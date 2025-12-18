@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>記事ページ | Emperor News</title>
+<link rel="stylesheet" href="/assets/blog-shared.css">
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="logo">E</div>
+      <div>
+        <h1>記事ページ</h1>
+        <p>スマホ・タブレット・PCの本文ビュー</p>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="pill" href="/blog-list.html">一覧へ</a>
+      <a class="pill ghost" href="/">トップ</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero" id="articleHero">
+      <div class="inline-chips" id="articleMeta"></div>
+      <h2 id="articleTitle">記事タイトル</h2>
+      <p id="articleLead" class="muted">本文の冒頭をここに表示します。</p>
+      <div class="actions" id="shareRow"></div>
+    </section>
+
+    <section class="grid-2">
+      <article class="card" id="articleBody"></article>
+      <aside class="card">
+        <h3>デバイス別の読みやすさ</h3>
+        <div class="device-grid">
+          <div class="device-card">
+            <strong>スマホ</strong>
+            <span class="mobile-hint">本文を1カラムで表示し、ボタンを大きめに。</span>
+          </div>
+          <div class="device-card">
+            <strong>タブレット</strong>
+            <span class="tablet-hint">本文幅を少し広げ、サイド余白を確保。</span>
+          </div>
+          <div class="device-card">
+            <strong>PC</strong>
+            <span class="pc-hint">最大1200pxのカラムで視線移動を最小化。</span>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel stack" id="commentSection">
+      <div class="section-title">
+        <h3>コメント</h3>
+        <span class="tiny" id="commentStatus">記事への感想を残せます。</span>
+      </div>
+      <form class="stack" id="commentForm">
+        <div class="grid-2" style="gap:12px;">
+          <div class="form-row">
+            <label class="tiny" for="commentAuthor">名前</label>
+            <input id="commentAuthor" name="commentAuthor" placeholder="匿名でも投稿できます">
+          </div>
+          <div class="form-row">
+            <label class="tiny" for="commentBody">コメント</label>
+            <textarea id="commentBody" name="commentBody" rows="3" required placeholder="本文への感想や質問"></textarea>
+          </div>
+        </div>
+        <div class="actions" style="justify-content: space-between; align-items: center; flex-wrap: wrap;">
+          <button class="primary" type="submit">投稿する</button>
+          <span class="tiny">ローカルに保存されるため即時表示されます。</span>
+        </div>
+      </form>
+      <div class="stack" id="commentList" style="gap:10px;"></div>
+    </section>
+  </main>
+
+<script src="/assets/lightbox.js"></script>
+<script src="/assets/blog-data.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  const articleIdx = parseInt(params.get("id"), 10) || 0;
+  const { article } = BlogData.findArticle(articleIdx);
+  const commentForm = document.getElementById("commentForm");
+  const commentAuthor = document.getElementById("commentAuthor");
+  const commentBody = document.getElementById("commentBody");
+  const commentList = document.getElementById("commentList");
+  const commentStatus = document.getElementById("commentStatus");
+
+  function renderArticle() {
+    const hero = document.getElementById("articleHero");
+    const titleEl = document.getElementById("articleTitle");
+    const leadEl = document.getElementById("articleLead");
+    const bodyEl = document.getElementById("articleBody");
+    const shareRow = document.getElementById("shareRow");
+    const meta = document.getElementById("articleMeta");
+    const safeArticle = article || { title: "記事がありません", body: "管理ページから追加してください", tags: [] };
+
+    titleEl.textContent = safeArticle.title || "無題の記事";
+    leadEl.textContent = safeArticle.body?.slice(0, 120) || "本文を入力してください";
+
+    meta.innerHTML = `
+      <span class="badge">ID ${articleIdx}</span>
+      <span class="badge">レスポンシブ本文</span>
+      ${(safeArticle.tags || []).map(tag => `<a class=\"tag\" href=\"/tag.html?tag=${encodeURIComponent(tag)}\">#${tag}</a>`).join("")}
+    `;
+
+    if (safeArticle.image) {
+      const img = document.createElement("img");
+      img.src = safeArticle.image;
+      img.alt = safeArticle.title;
+      img.className = "hero-img";
+      hero.appendChild(img);
+      Lightbox.enhanceImages(hero);
+    }
+
+    bodyEl.classList.add("article-body");
+    bodyEl.innerHTML = (safeArticle.body || "本文がありません").split(/\n+/).map(p => `<p>${p}</p>`).join("");
+
+    const articleUrl = `${location.origin}/blog-article.html?id=${articleIdx}`;
+    const shareUrl = BlogData.buildOfficialLineShare(articleUrl);
+    shareRow.innerHTML = `
+      <a class="share line" href="${shareUrl}" target="_blank" rel="noreferrer">LINEで共有</a>
+      <a class="share" href="${articleUrl}" target="_blank">リンクをコピー</a>
+    `;
+  }
+
+  function formatRelativeTime(timestamp) {
+    const diffMs = Date.now() - timestamp;
+    const diffMinutes = Math.floor(diffMs / 60000);
+    if (diffMinutes < 60) return `${diffMinutes || 1}分前`;
+    const diffHours = Math.floor(diffMinutes / 60);
+    if (diffHours < 24) return `${diffHours}時間前`;
+    const diffDays = Math.floor(diffHours / 24);
+    return `${diffDays}日前`;
+  }
+
+  function renderComments() {
+    const comments = BlogData.loadComments(articleIdx);
+    commentList.innerHTML = "";
+    if (!comments.length) {
+      commentList.innerHTML = '<p class="muted">まだコメントがありません。最初の感想を投稿してください。</p>';
+      return;
+    }
+    comments.forEach((item) => {
+      const row = document.createElement("article");
+      row.className = "card comment-card";
+      const header = document.createElement("div");
+      header.className = "comment-header";
+      const author = document.createElement("strong");
+      author.textContent = item.author || "名無しさん";
+      const time = document.createElement("span");
+      time.className = "tiny";
+      time.textContent = formatRelativeTime(item.createdAt);
+      header.appendChild(author);
+      header.appendChild(time);
+      const body = document.createElement("p");
+      body.className = "comment-body";
+      body.textContent = item.body;
+      row.appendChild(header);
+      row.appendChild(body);
+      commentList.appendChild(row);
+    });
+  }
+
+  function handleCommentSubmit(event) {
+    event.preventDefault();
+    const author = commentAuthor.value.trim();
+    const body = commentBody.value.trim();
+    if (!body) {
+      commentStatus.textContent = "コメントを入力してください。";
+      return;
+    }
+    const next = BlogData.addComment(articleIdx, { author, body });
+    commentBody.value = "";
+    commentStatus.textContent = `${next.length}件のコメント`;
+    renderComments();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    renderArticle();
+    renderComments();
+  });
+  commentForm.addEventListener("submit", handleCommentSubmit);
+</script>
+</body>
+</html>

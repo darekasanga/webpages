@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emperor News | Project-E</title>
+<link rel="stylesheet" href="/assets/base.css">
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="logo">E</div>
+      <div>
+        <h1>Emperor News</h1>
+        <p>スマホ / タブレット / PC 全面刷新</p>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="pill primary" href="/blog-list.html">一覧ビュー</a>
+      <a class="pill ghost" href="/admin.html">管理画面</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div class="inline-chips">
+        <div class="badge" id="heroBadge">New UI</div>
+        <div class="badge" id="heroMeta">レスポンシブ更新</div>
+      </div>
+      <h2 id="heroTitle">全ページをレスポンシブで作り直しました</h2>
+      <p id="heroBody">スマホは片手で読みやすく、タブレットは横幅を活かし、PCはサイド情報付きで一覧性を高めました。すべてのページで共通のナビゲーションとダークテーマを採用しています。</p>
+      <div class="tag-row" id="heroTags"></div>
+      <div class="actions" id="heroActions">
+        <a class="button primary" href="/blog-list.html">ブログ一覧ビュー</a>
+        <a class="button ghost" href="/blog-article.html">単体記事</a>
+        <a class="button ghost" href="/blog-edit.html">記事編集</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>注目記事</h2>
+        <span class="muted">横スクロールでチェック</span>
+      </div>
+      <div class="scroll-shell">
+        <div class="scroll-row" id="featuredRow"></div>
+        <div class="scroll-controls" aria-hidden="true">
+          <button class="pill ghost" type="button" data-scroll="left">◀</button>
+          <button class="pill ghost" type="button" data-scroll="right">▶</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>最新記事</h2>
+        <span class="muted">縦スクロールでまとめ読み</span>
+      </div>
+      <div class="list-shell latest-list">
+        <div class="list" id="latestList"></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-title">
+        <h2>ページリンク</h2>
+        <span class="muted">すべてレスポンシブ対応</span>
+      </div>
+      <div class="card-grid" id="pageLinks"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="section-title">
+      <span>Project-E / Emperor News</span>
+      <span class="tiny">スマホ・タブレット・PCで同じ体験を届けます。</span>
+    </div>
+  </footer>
+  <script src="/assets/lightbox.js"></script>
+  <script src="/assets/blog-data.js"></script>
+  <script>
+    const latestList = document.getElementById("latestList");
+    const heroTitle = document.getElementById("heroTitle");
+    const heroBody = document.getElementById("heroBody");
+    const heroTags = document.getElementById("heroTags");
+    const heroActions = document.getElementById("heroActions");
+    const heroBadge = document.getElementById("heroBadge");
+    const heroMeta = document.getElementById("heroMeta");
+    const featuredRow = document.getElementById("featuredRow");
+    const pageLinks = document.getElementById("pageLinks");
+
+    const heroFallback = {
+      title: "全ページをレスポンシブで作り直しました",
+      body: "スマホは片手で読みやすく、タブレットは横幅を活かし、PCはサイド情報付きで一覧性を高めました。すべてのページで共通のナビゲーションとダークテーマを採用しています。",
+      tags: ["スマホ対応", "タブレット", "PC"]
+    };
+
+    function formatRelative(index) {
+      const base = Date.now() - index * 3_600_000 * 3;
+      const diffHours = Math.max(1, Math.round((Date.now() - base) / 3_600_000));
+      if (diffHours < 24) return `${diffHours}時間前`;
+      const days = Math.round(diffHours / 24);
+      return `${days}日前`;
+    }
+
+    function renderLatestList() {
+      const latest = BlogData.getHomeLatestArticles();
+      const articles = latest.list;
+      latestList.innerHTML = "";
+
+      if (!articles.length) {
+        latestList.innerHTML = '<p class="muted">まだ記事がありません。管理画面から追加してください。</p>';
+        return;
+      }
+
+      articles.forEach(({ article, idx }, orderIdx) => {
+        const isLatest = orderIdx === 0;
+        const primaryTag = article.tags?.[0];
+        const detailLink = `/blog-article.html?id=${idx}`;
+        const card = document.createElement("article");
+        card.className = "list-card latest-card";
+        card.innerHTML = `
+          <div class="latest-top">
+            <h3>${article.title || "無題の記事"}</h3>
+            ${isLatest ? '<span class="badge">NEW</span>' : ""}
+          </div>
+          <p>${article.body || "本文がありません"}</p>
+          <div class="latest-meta">
+            <span>${formatRelative(idx)}</span>
+            <span>${primaryTag ? `#${primaryTag}` : "タグなし"}</span>
+            <span><a class="tag" href="${detailLink}">記事を読む</a></span>
+          </div>
+        `;
+        latestList.appendChild(card);
+      });
+    }
+
+    function renderFeaturedRow() {
+      const featured = BlogData.getHomeFeaturedArticles();
+      const articles = featured.list;
+      featuredRow.innerHTML = "";
+
+      if (!articles.length) {
+        featuredRow.innerHTML = '<p class="muted">記事を追加して注目枠を設定してください。</p>';
+        return;
+      }
+
+      const gradients = ["", "gradient-blue", "gradient-gold", "gradient-purple"];
+
+      articles.forEach(({ article, idx }, orderIdx) => {
+        const card = document.createElement("article");
+        const gradient = gradients[orderIdx % gradients.length];
+        card.className = `featured-card ${gradient}`.trim();
+        const cover = article.image
+          ? `<div class="featured-thumb" aria-hidden="true" style="background-image: url(${article.image}); background-size: cover; background-position: center;"></div>`
+          : '<div class="featured-thumb fallback" aria-hidden="true">NO IMAGE</div>';
+        const primaryTag = article.tags?.[0];
+        const secondaryTag = article.tags?.[1];
+        const articleUrl = `/blog-article.html?id=${idx}`;
+        card.innerHTML = `
+          ${cover}
+          <div class="featured-pill">ID ${idx}</div>
+          <h3>${article.title || "無題の記事"}</h3>
+          <p>${article.body || "本文がありません"}</p>
+          <div class="featured-meta">
+            <span>${primaryTag ? `#${primaryTag}` : "タグなし"}</span>
+            <span>${secondaryTag ? `#${secondaryTag}` : "選択順 ${orderIdx + 1}"}</span>
+          </div>
+          <div class="actions" style="margin-top:8px;">
+            <a class="button ghost" href="${articleUrl}">記事を読む</a>
+          </div>
+        `;
+        featuredRow.appendChild(card);
+      });
+    }
+
+    function attachHorizontalControls(track) {
+      const controls = track.parentElement?.querySelectorAll('[data-scroll]');
+      if (!controls?.length) return;
+      controls.forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const direction = btn.dataset.scroll === "left" ? -1 : 1;
+          const distance = track.clientWidth * 0.8 * direction;
+          track.scrollBy({ left: distance, behavior: "smooth" });
+        });
+      });
+    }
+
+    function renderPageLinks() {
+      const links = BlogData.loadPageLinks();
+      pageLinks.innerHTML = "";
+      if (!links.length) {
+        pageLinks.innerHTML = '<p class="muted">ページリンクがまだ設定されていません。</p>';
+        return;
+      }
+      links.forEach((link) => {
+        const card = document.createElement("article");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${link.title}</h3>
+          <p>${link.description || ""}</p>
+          <a class="button ghost" href="${link.url}">開く</a>
+        `;
+        pageLinks.appendChild(card);
+      });
+    }
+
+    function renderHeroFromArticle() {
+      const { article, idx } = BlogData.getHeroArticle();
+      const articles = BlogData.loadArticles();
+      heroTags.innerHTML = "";
+      heroActions.innerHTML = "";
+
+      if (!articles.length || !article) {
+        heroBadge.textContent = "New UI";
+        heroMeta.textContent = "レスポンシブ更新";
+        heroTitle.textContent = heroFallback.title;
+        heroBody.textContent = heroFallback.body;
+        heroFallback.tags.forEach((tag) => {
+          const chip = document.createElement("span");
+          chip.className = "badge";
+          chip.textContent = tag;
+          heroTags.appendChild(chip);
+        });
+        heroActions.innerHTML = `
+          <a class="button primary" href="/blog-list.html">ブログ一覧ビュー</a>
+          <a class="button ghost" href="/blog-article.html">単体記事</a>
+          <a class="button ghost" href="/blog-edit.html">記事編集</a>
+        `;
+        return;
+      }
+
+      heroBadge.textContent = "トップおすすめ";
+      heroMeta.textContent = `ID ${idx}`;
+      heroTitle.textContent = article.title || "無題の記事";
+      heroBody.textContent = article.body || "本文がありません";
+
+      if (article.tags?.length) {
+        article.tags.forEach((tag) => {
+          const link = document.createElement("a");
+          link.className = "tag";
+          link.href = `/tag.html?tag=${encodeURIComponent(tag)}`;
+          link.textContent = `#${tag}`;
+          heroTags.appendChild(link);
+        });
+      } else {
+        heroTags.innerHTML = '<span class="badge">#untagged</span>';
+      }
+
+      const articleUrl = `${location.origin}/blog-article.html?id=${idx}`;
+      const shareUrl = BlogData.buildOfficialLineShare(articleUrl);
+      heroActions.innerHTML = `
+        <a class="button primary" href="/blog-list.html">ブログ一覧ビュー</a>
+        <a class="button ghost" href="${articleUrl}">この記事を読む</a>
+        <a class="button ghost" href="${shareUrl}" target="_blank" rel="noreferrer">LINEで共有</a>
+      `;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      renderHeroFromArticle();
+      renderLatestList();
+      renderFeaturedRow();
+      renderPageLinks();
+      attachHorizontalControls(featuredRow);
+    });
+  </script>
+</body>
+</html>
