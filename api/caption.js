@@ -12,18 +12,19 @@ export default async function handler(req, res) {
 
     const payload = {
       model: "gpt-4o-mini",
-      input: [
+      messages: [
         {
           role: "user",
           content: [
-            { type: "input_text", text: "Describe this sketch briefly and clearly." },
-            { type: "input_image", image_url: url }
+            { type: "text", text: "Describe this sketch briefly and clearly." },
+            { type: "image_url", image_url: { url } }
           ]
         }
-      ]
+      ],
+      max_tokens: 300
     };
 
-    const r = await fetch("https://api.openai.com/v1/responses", {
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -36,11 +37,7 @@ export default async function handler(req, res) {
     if (!r.ok) return res.status(500).json({ error: text });
     const data = JSON.parse(text);
 
-    const caption =
-      data.output_text ||
-      data.output?.[0]?.content?.[0]?.text ||
-      data.output?.[0]?.message?.content ||
-      "";
+    const caption = data.choices?.[0]?.message?.content || "";
 
     res.status(200).json({ caption: caption.trim() });
   } catch (e) {
