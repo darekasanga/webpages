@@ -12,7 +12,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "gpt-image-1",
+        model: "dall-e-2",
         prompt,
         size: "1024x1024",
         response_format: "b64_json"
