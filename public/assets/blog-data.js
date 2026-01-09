@@ -106,6 +106,12 @@
 
   const defaultPageLinks = [
     {
+      id: "codex",
+      title: "❌ Code X",
+      description: "CODE X実装デモンストレーション。レスポンシブデザインとインタラクティブ機能を搭載。",
+      url: "/codex.html",
+    },
+    {
       id: "draw",
       title: "🎨 Draw Board",
       description: "新しいダークテーマとレスポンシブボタンで描画ツールも刷新。指でもマウスでも快適です。",
