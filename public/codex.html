@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Code X - Emperor News</title>
+<link rel="stylesheet" href="/assets/base.css">
+<body>
+  <header class="site-header">
+    <div class="brand">
+      <div class="logo">X</div>
+      <div>
+        <h1>Code X</h1>
+        <p>コーディングデモンストレーション</p>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="pill" href="/">ホームへ戻る</a>
+      <a class="pill ghost" href="/blog-list.html">ブログ一覧</a>
+    </div>
+  </header>
+
+  <main class="container" style="max-width:880px;">
+    <section class="hero">
+      <div class="inline-chips">
+        <span class="badge">実装完了</span>
+        <span class="badge">Code X</span>
+      </div>
+      <h2>Code X プロジェクト</h2>
+      <p>このページは「CODE X」の実装デモンストレーションです。既存のデザインパターンに従い、レスポンシブで統一されたUIを提供します。</p>
+      
+      <div class="stack" style="margin-top: 24px;">
+        <h3>主な機能</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="padding: 12px; background: var(--panel); border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--border);">
+            ✅ レスポンシブデザイン - スマホ、タブレット、PC対応
+          </li>
+          <li style="padding: 12px; background: var(--panel); border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--border);">
+            ✅ 統一されたUIパターン - 既存のbase.cssを使用
+          </li>
+          <li style="padding: 12px; background: var(--panel); border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--border);">
+            ✅ ダークテーマ対応 - モダンなビジュアルスタイル
+          </li>
+          <li style="padding: 12px; background: var(--panel); border-radius: var(--radius-sm); margin-bottom: 8px; border: 1px solid var(--border);">
+            ✅ インタラクティブ要素 - 以下のデモを参照
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="hero" style="margin-top: 24px;">
+      <h3>インタラクティブデモ</h3>
+      <p class="muted">下のボタンをクリックして、Code Xの機能を試してください。</p>
+      
+      <div id="demoArea" style="padding: 20px; background: var(--panel-alt); border-radius: var(--radius); border: 1px solid var(--border); margin-top: 16px;">
+        <div class="actions" style="justify-content: center;">
+          <button class="primary" id="demoBtn1">デモ 1</button>
+          <button class="secondary" id="demoBtn2">デモ 2</button>
+          <button class="secondary" id="demoBtn3">リセット</button>
+        </div>
+        <div id="output" style="margin-top: 16px; padding: 12px; background: var(--bg-alt); border-radius: var(--radius-sm); min-height: 60px; text-align: center; color: var(--muted);">
+          出力エリア - ボタンをクリックして結果を表示
+        </div>
+      </div>
+
+      <div style="margin-top: 24px; padding: 16px; background: var(--panel); border-radius: var(--radius-sm); border-left: 3px solid var(--accent);">
+        <h4 style="margin-top: 0;">コードサンプル</h4>
+        <pre style="background: var(--bg-alt); padding: 12px; border-radius: var(--radius-sm); overflow-x: auto;"><code>// Code X Implementation
+function executeCodeX() {
+  console.log('Code X is running!');
+  return {
+    status: 'success',
+    message: 'Implementation complete'
+  };
+}</code></pre>
+      </div>
+    </section>
+
+    <section class="hero" style="margin-top: 24px;">
+      <h3>技術スタック</h3>
+      <div class="tag-row" style="margin-top: 12px;">
+        <span class="badge">HTML5</span>
+        <span class="badge">CSS3</span>
+        <span class="badge">JavaScript</span>
+        <span class="badge">Responsive Design</span>
+        <span class="badge">Dark Theme</span>
+      </div>
+    </section>
+
+    <section class="hero" style="margin-top: 24px;">
+      <h3>次のステップ</h3>
+      <div class="actions">
+        <a class="button primary" href="/blog-edit.html">記事を作成</a>
+        <a class="button ghost" href="/draw.html">描画ツール</a>
+        <a class="button ghost" href="/chat-toc.html">チャット目次</a>
+        <a class="button ghost" href="/admin.html">管理画面</a>
+      </div>
+    </section>
+  </main>
+
+<script>
+  // Code X Interactive Demo
+  const output = document.getElementById('output');
+  let clickCount = 0;
+
+  document.getElementById('demoBtn1').addEventListener('click', () => {
+    clickCount++;
+    output.innerHTML = `<strong style="color: var(--accent);">✓ デモ 1 実行成功</strong><br>クリック数: ${clickCount}`;
+  });
+
+  document.getElementById('demoBtn2').addEventListener('click', () => {
+    const timestamp = new Date().toLocaleTimeString('ja-JP');
+    output.innerHTML = `<strong style="color: var(--accent-2);">✓ デモ 2 実行成功</strong><br>実行時刻: ${timestamp}`;
+  });
+
+  document.getElementById('demoBtn3').addEventListener('click', () => {
+    clickCount = 0;
+    output.innerHTML = '<span style="color: var(--muted);">リセット完了 - 再度ボタンをクリックしてください</span>';
+  });
+
+  // Log initialization
+  console.log('Code X page initialized successfully');
+  console.log('All interactive elements are ready');
+</script>
+</body>
+</html>

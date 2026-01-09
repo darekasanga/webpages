@@ -7,6 +7,7 @@
   "routes": [
     { "src": "^/api/(.*)$", "dest": "/api/$1" },
     { "src": "^/draw$", "dest": "/public/draw.html" },
+    { "src": "^/codex$", "dest": "/public/codex.html" },
     { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
