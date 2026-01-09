@@ -9,7 +9,7 @@ export default async function handler(req, res) {
     status: "ok",
     timestamp: new Date().toISOString(),
     service: "webpages",
-    version: "1.0.0"
+    version: process.env.VERSION || "1.0.0"
   };
 
   res.status(200).json(health);

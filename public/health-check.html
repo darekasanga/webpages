@@ -136,9 +136,14 @@
         dataEl.classList.remove('visible');
 
         const response = await fetch('/api/health');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
         const data = await response.json();
 
-        if (response.ok && data.status === 'ok') {
+        if (data.status === 'ok') {
           statusEl.className = 'status success';
           statusEl.textContent = '✅ Service is healthy!';
           dataEl.textContent = JSON.stringify(data, null, 2);
